@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Building2,
   Users,
+  UserCog,
   Briefcase,
   FolderKanban,
   FileText,
@@ -21,6 +22,11 @@ const menuItems = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Calendar",
+    href: "/dashboard/calendar",
+    icon: Calendar,
   },
   {
     title: "Companies",
@@ -50,7 +56,12 @@ const menuItems = [
   {
     title: "Activities",
     href: "/dashboard/activities",
-    icon: Calendar,
+    icon: Briefcase,
+  },
+  {
+    title: "Users",
+    href: "/dashboard/users",
+    icon: UserCog,
   },
   {
     title: "Settings",
