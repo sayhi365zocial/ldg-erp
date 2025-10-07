@@ -29,6 +29,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# VS Code workspace
+*.code-workspace
+
 # vercel
 .vercel
 
