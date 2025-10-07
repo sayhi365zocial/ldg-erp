@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 60% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 60% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 60% 5%;
+    --primary: 240 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 100% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 5% 91%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 240 5% 91%;
+    --accent-foreground: 240 60% 5%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 240 100% 50%;
+    --radius: 0.5rem;
+
+    /* TailAdmin custom colors */
+    --stroke: 220 13% 91%;
+    --strokedark: 215 20% 17%;
+    --boxdark: 215 20% 17%;
+    --bodydark: 215 16% 47%;
+    --bodydark1: 217 19% 27%;
+    --bodydark2: 218 20% 65%;
+    --graydark: 215 20% 25%;
+    --meta-1: 0 85% 61%;
+    --meta-4: 240 100% 65%;
+  }
+
+  .dark {
+    --background: 240 60% 5%;
+    --foreground: 0 0% 98%;
+    --card: 240 60% 5%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 60% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 240 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 100% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 40% 15%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 40% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 40% 15%;
+    --input: 240 40% 15%;
+    --ring: 240 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-optical-sizing: auto;
+    font-variation-settings: "wdth" 100;
+  }
+}

@@ -1,0 +1,443 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relations
+  activities    Activity[]
+  dealsOwned    Deal[]     @relation("DealOwner")
+  projectsOwned Project[]  @relation("ProjectOwner")
+  invoicesCreated Invoice[] @relation("InvoiceCreator")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  SALES
+  FINANCE
+  USER
+}
+
+// ============================================
+// COMPANIES & CONTACTS
+// ============================================
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  logo        String?
+  industry    String?
+  website     String?
+  phone       String?
+  email       String?
+  address     String?
+  city        String?
+  province    String?
+  postalCode  String?
+  country     String?  @default("Thailand")
+  taxId       String?  @unique
+  notes       String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  contacts    ContactPerson[]
+  deals       Deal[]
+  projects    Project[]
+  invoices    Invoice[]
+
+  @@map("companies")
+}
+
+model ContactPerson {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  position    String?
+  department  String?
+  isPrimary   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  activities  Activity[]
+  deals       Deal[]
+
+  // Track history when person changes company
+  contactHistory ContactHistory[]
+
+  @@map("contact_persons")
+}
+
+// Track when contact person moves between companies
+model ContactHistory {
+  id          String   @id @default(cuid())
+  contactId   String
+  companyId   String
+  companyName String
+  position    String?
+  startDate   DateTime
+  endDate     DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  contact     ContactPerson @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("contact_history")
+}
+
+// ============================================
+// SALES PIPELINE & DEALS
+// ============================================
+
+model Deal {
+  id              String      @id @default(cuid())
+  title           String
+  description     String?     @db.Text
+  value           Float
+  probability     Int         @default(50) // 0-100
+  stage           DealStage   @default(LEAD)
+  status          DealStatus  @default(OPEN)
+  expectedCloseDate DateTime?
+  actualCloseDate   DateTime?
+  lostReason      String?
+  source          String?     // Where did this lead come from
+  priority        Priority    @default(MEDIUM)
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  companyId       String
+  company         Company     @relation(fields: [companyId], references: [id])
+
+  contactId       String?
+  contact         ContactPerson? @relation(fields: [contactId], references: [id])
+
+  ownerId         String
+  owner           User        @relation("DealOwner", fields: [ownerId], references: [id])
+
+  activities      Activity[]
+  projects        Project[]
+
+  @@map("deals")
+}
+
+enum DealStage {
+  LEAD
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ============================================
+// PROJECTS & SERVICES
+// ============================================
+
+model Project {
+  id              String        @id @default(cuid())
+  name            String
+  description     String?       @db.Text
+  projectType     ProjectType
+  status          ProjectStatus @default(PLANNING)
+  startDate       DateTime?
+  endDate         DateTime?
+  actualEndDate   DateTime?
+  budget          Float?
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id])
+
+  dealId          String?
+  deal            Deal?         @relation(fields: [dealId], references: [id])
+
+  ownerId         String
+  owner           User          @relation("ProjectOwner", fields: [ownerId], references: [id])
+
+  serviceItems    ServiceItem[]
+  invoices        Invoice[]
+  activities      Activity[]
+
+  @@map("projects")
+}
+
+enum ProjectType {
+  DIGITAL_MARKETING
+  WEBSITE_DEVELOPMENT
+  HOSTING
+  EVENT
+  PRINTING
+  OTHER
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model ServiceItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  quantity    Float    @default(1)
+  unitPrice   Float
+  totalPrice  Float
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  invoiceItems InvoiceItem[]
+
+  @@map("service_items")
+}
+
+// ============================================
+// INVOICING & BILLING
+// ============================================
+
+model Invoice {
+  id              String          @id @default(cuid())
+  invoiceNumber   String          @unique
+  type            InvoiceType     @default(ONE_TIME)
+  status          InvoiceStatus   @default(DRAFT)
+  issueDate       DateTime        @default(now())
+  dueDate         DateTime
+  paidDate        DateTime?
+
+  subtotal        Float
+  taxRate         Float           @default(7) // VAT 7%
+  taxAmount       Float
+  discountAmount  Float           @default(0)
+  totalAmount     Float
+
+  notes           String?         @db.Text
+  terms           String?         @db.Text
+
+  // Recurring invoice fields
+  isRecurring     Boolean         @default(false)
+  recurringInterval RecurringInterval?
+  recurringStartDate DateTime?
+  recurringEndDate   DateTime?
+  nextInvoiceDate    DateTime?
+  parentInvoiceId    String?
+
+  // Reminders
+  reminderSent    Boolean         @default(false)
+  reminderSentAt  DateTime?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  companyId       String
+  company         Company         @relation(fields: [companyId], references: [id])
+
+  projectId       String?
+  project         Project?        @relation(fields: [projectId], references: [id])
+
+  createdById     String
+  createdBy       User            @relation("InvoiceCreator", fields: [createdById], references: [id])
+
+  items           InvoiceItem[]
+  activities      Activity[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  description String
+  quantity    Float
+  unitPrice   Float
+  totalPrice  Float
+  sortOrder   Int      @default(0)
+
+  // Relations
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  serviceItemId String?
+  serviceItem   ServiceItem? @relation(fields: [serviceItemId], references: [id])
+
+  @@map("invoice_items")
+}
+
+enum InvoiceType {
+  ONE_TIME
+  RECURRING
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PARTIAL_PAYMENT
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+enum RecurringInterval {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// ============================================
+// ACTIVITY LOG & TRACKING
+// ============================================
+
+model Activity {
+  id          String       @id @default(cuid())
+  type        ActivityType
+  title       String
+  description String?      @db.Text
+  dueDate     DateTime?
+  completedAt DateTime?
+  isCompleted Boolean      @default(false)
+  priority    Priority     @default(MEDIUM)
+  metadata    Json?        // Store additional flexible data
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+
+  contactId   String?
+  contact     ContactPerson? @relation(fields: [contactId], references: [id])
+
+  dealId      String?
+  deal        Deal?        @relation(fields: [dealId], references: [id])
+
+  projectId   String?
+  project     Project?     @relation(fields: [projectId], references: [id])
+
+  invoiceId   String?
+  invoice     Invoice?     @relation(fields: [invoiceId], references: [id])
+
+  @@map("activities")
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+  TASK
+  DEAL_CREATED
+  DEAL_UPDATED
+  DEAL_WON
+  DEAL_LOST
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  INVOICE_CREATED
+  INVOICE_SENT
+  INVOICE_PAID
+  CONTACT_CREATED
+  CONTACT_UPDATED
+  OTHER
+}

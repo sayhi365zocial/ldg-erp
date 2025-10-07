@@ -1,0 +1,118 @@
+"use client"
+
+import Link from "next/link"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
+  Briefcase,
+  FolderKanban,
+  FileText,
+  Calendar,
+  Settings,
+  TrendingUp,
+} from "lucide-react"
+
+const menuItems = [
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Companies",
+    href: "/dashboard/companies",
+    icon: Building2,
+  },
+  {
+    title: "Contacts",
+    href: "/dashboard/contacts",
+    icon: Users,
+  },
+  {
+    title: "Deals",
+    href: "/dashboard/deals",
+    icon: TrendingUp,
+  },
+  {
+    title: "Projects",
+    href: "/dashboard/projects",
+    icon: FolderKanban,
+  },
+  {
+    title: "Invoices",
+    href: "/dashboard/invoices",
+    icon: FileText,
+  },
+  {
+    title: "Activities",
+    href: "/dashboard/activities",
+    icon: Calendar,
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
+  },
+]
+
+export function Sidebar() {
+  const pathname = usePathname()
+
+  return (
+    <aside className="fixed left-0 top-0 z-50 h-screen w-72 bg-white border-r dark:bg-gray-950">
+      {/* Logo */}
+      <div className="flex items-center gap-2 px-6 py-5 border-b">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="relative h-10 w-10 rounded-lg overflow-hidden">
+            <Image
+              src="/logo.png"
+              alt="LDG Logo"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">LDG ERP</h1>
+            <p className="text-xs text-muted-foreground">Management System</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <nav className="mt-6 px-4">
+        <div>
+          <h3 className="mb-4 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            MENU
+          </h3>
+          <ul className="space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </nav>
+    </aside>
+  )
+}
