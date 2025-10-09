@@ -30,13 +30,13 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 flex w-full bg-white border-b dark:bg-gray-950">
       <div className="flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
-        <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Hamburger Toggle */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="z-50 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+            className="flex items-center justify-center rounded-md p-2 hover:bg-accent lg:hidden"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-6 w-6" />
           </button>
         </div>
 

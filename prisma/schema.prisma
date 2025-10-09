@@ -125,6 +125,7 @@ model ContactPerson {
   phone       String?
   position    String?
   department  String?
+  image       String?
   isPrimary   Boolean  @default(false)
   isActive    Boolean  @default(true)
   notes       String?  @db.Text
