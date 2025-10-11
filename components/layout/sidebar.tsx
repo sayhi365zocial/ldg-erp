@@ -15,6 +15,7 @@ import {
   Calendar,
   Settings,
   TrendingUp,
+  CheckSquare,
   X,
 } from "lucide-react"
 
@@ -38,6 +39,11 @@ const menuItems = [
     title: "Contacts",
     href: "/dashboard/contacts",
     icon: Users,
+  },
+  {
+    title: "Tasks",
+    href: "/dashboard/tasks",
+    icon: CheckSquare,
   },
   {
     title: "Deals",

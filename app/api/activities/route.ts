@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     const body = await req.json()
 
     // Prepare metadata with attachments
-    const metadata = body.attachments ? { attachments: body.attachments } : null
+    const metadata = body.attachments ? { attachments: body.attachments } : undefined
 
     const activity = await prisma.activity.create({
       data: {

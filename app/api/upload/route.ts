@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File
-    const type = formData.get("type") as string || "companies" // companies or contacts
+    const type = formData.get("type") as string || "companies" // companies, contacts, tasks, or activities
 
     if (!file) {
       return NextResponse.json(
@@ -24,8 +34,8 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-    } else if (type === "activities") {
-      // Allow common file types for activities
+    } else if (type === "activities" || type === "tasks") {
+      // Allow common file types for activities and tasks
       const allowedTypes = [
         "image/",
         "application/pdf",
@@ -36,9 +46,11 @@ export async function POST(request: NextRequest) {
         "application/vnd.ms-powerpoint",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         "text/",
+        "application/zip",
+        "application/x-zip-compressed",
       ]
 
-      const isAllowed = allowedTypes.some(type => file.type.startsWith(type))
+      const isAllowed = allowedTypes.some(allowedType => file.type.startsWith(allowedType))
       if (!isAllowed) {
         return NextResponse.json(
           { error: "File type not allowed" },
@@ -47,8 +59,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate file size (max 10MB for activities, 5MB for others)
-    const maxSize = type === "activities" ? 10 * 1024 * 1024 : 5 * 1024 * 1024
+    // Validate file size (max 10MB for activities and tasks, 5MB for others)
+    const maxSize = (type === "activities" || type === "tasks") ? 10 * 1024 * 1024 : 5 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: `File size must be less than ${maxSize / 1024 / 1024}MB` },

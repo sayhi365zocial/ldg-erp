@@ -7,8 +7,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = env("DIRECT_URL")
 }
 
 // ============================================
@@ -34,6 +33,7 @@ model User {
   dealsOwned    Deal[]     @relation("DealOwner")
   projectsOwned Project[]  @relation("ProjectOwner")
   invoicesCreated Invoice[] @relation("InvoiceCreator")
+  tasks         Task[]     @relation("TaskAssignee")
 
   @@map("users")
 }
@@ -113,6 +113,7 @@ model Company {
   deals       Deal[]
   projects    Project[]
   invoices    Invoice[]
+  tasks       Task[]
 
   @@map("companies")
 }
@@ -138,6 +139,7 @@ model ContactPerson {
 
   activities  Activity[]
   deals       Deal[]
+  tasks       Task[]
 
   // Track history when person changes company
   contactHistory ContactHistory[]
@@ -441,4 +443,40 @@ enum ActivityType {
   CONTACT_CREATED
   CONTACT_UPDATED
   OTHER
+}
+
+// ============================================
+// TASKS & TODO LIST
+// ============================================
+
+model Task {
+  id          String      @id @default(cuid())
+  title       String
+  description String?     @db.Text
+  status      TaskStatus  @default(PENDING)
+  priority    Priority    @default(MEDIUM)
+  dueDate     DateTime?
+  completedAt DateTime?
+  attachments String[]    @default([]) // Array of file URLs
+  notes       String?     @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  userId      String
+  user        User        @relation("TaskAssignee", fields: [userId], references: [id])
+
+  contactId   String?
+  contact     ContactPerson? @relation(fields: [contactId], references: [id])
+
+  companyId   String?
+  company     Company?    @relation(fields: [companyId], references: [id])
+
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  PENDING
+  DOING
+  DONE
 }
