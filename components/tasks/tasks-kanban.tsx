@@ -25,6 +25,8 @@ interface TasksKanbanProps {
   showUser?: boolean
 }
 
+type TaskStatus = "PENDING" | "DOING" | "DONE"
+
 const statusColors = {
   PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
   DOING: "bg-blue-100 text-blue-800 border-blue-300",
@@ -44,8 +46,9 @@ const columns = [
   { id: "DONE", title: "Done", color: "border-green-300" },
 ]
 
-export function TasksKanban({ tasks, showUser = false }: TasksKanbanProps) {
+export function TasksKanban({ tasks: initialTasks, showUser = false }: TasksKanbanProps) {
   const router = useRouter()
+  const [tasks, setTasks] = useState(initialTasks)
   const [activeTask, setActiveTask] = useState<any>(null)
   const [selectedTask, setSelectedTask] = useState<any>(null)
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
@@ -70,12 +73,24 @@ export function TasksKanban({ tasks, showUser = false }: TasksKanbanProps) {
     if (!over || active.id === over.id) return
 
     const taskId = active.id as string
-    const newStatus = over.id as string
+    const newStatus = over.id as TaskStatus
 
-    // Optimistically update UI
+    // Find the task
     const task = tasks.find((t) => t.id === taskId)
     if (!task || task.status === newStatus) return
 
+    const oldStatus = task.status
+
+    // Optimistically update UI immediately
+    setTasks(prevTasks =>
+      prevTasks.map(t =>
+        t.id === taskId
+          ? { ...t, status: newStatus, completedAt: newStatus === "DONE" ? new Date() : null }
+          : t
+      )
+    )
+
+    // Then save to backend
     try {
       const response = await fetch("/api/tasks", {
         method: "PUT",
@@ -89,11 +104,17 @@ export function TasksKanban({ tasks, showUser = false }: TasksKanbanProps) {
 
       if (!response.ok) throw new Error("Failed to update task")
 
+      // Refresh to get the latest data from server
       router.refresh()
     } catch (error) {
       console.error(error)
+      // Revert optimistic update on error
+      setTasks(prevTasks =>
+        prevTasks.map(t =>
+          t.id === taskId ? { ...t, status: oldStatus } : t
+        )
+      )
       alert("Failed to update task status")
-      router.refresh()
     }
   }
 
