@@ -96,39 +96,43 @@ export default async function ContactDetailPage({
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Left Column */}
+      <div className="grid gap-6 md:grid-cols-4">
+        {/* Left Sidebar - Contact Information */}
         <div className="md:col-span-1 space-y-6">
-          {/* Contact Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
+              <CardTitle>Key information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Company */}
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-muted-foreground" />
-                <Link
-                  href={`/dashboard/companies/${contact.company.id}`}
-                  className="hover:underline"
-                >
-                  {contact.company.name}
-                </Link>
-              </div>
+              {contact.company && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Company</div>
+                  <Link
+                    href={`/dashboard/companies/${contact.company.id}`}
+                    className="text-sm hover:underline flex items-center gap-2"
+                  >
+                    <Building2 className="h-4 w-4" />
+                    {contact.company.name}
+                  </Link>
+                </div>
+              )}
 
               {/* Email */}
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <a href={`mailto:${contact.email}`} className="hover:underline">
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Email</div>
+                <a href={`mailto:${contact.email}`} className="text-sm hover:underline flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
                   {contact.email}
                 </a>
               </div>
 
               {/* Phone */}
               {contact.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <a href={`tel:${contact.phone}`} className="hover:underline">
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Phone number</div>
+                  <a href={`tel:${contact.phone}`} className="text-sm hover:underline flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
                     {contact.phone}
                   </a>
                 </div>
@@ -136,32 +140,45 @@ export default async function ContactDetailPage({
 
               {/* Department */}
               {contact.department && (
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{contact.department}</span>
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Department</div>
+                  <div className="text-sm flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    {contact.department}
+                  </div>
+                </div>
+              )}
+
+              {/* Position */}
+              {contact.position && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Job title</div>
+                  <div className="text-sm">{contact.position}</div>
                 </div>
               )}
             </CardContent>
-
-            {/* Notes */}
-            {contact.notes && (
-              <>
-                <CardHeader>
-                  <CardTitle>Notes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap">{contact.notes}</p>
-                </CardContent>
-              </>
-            )}
           </Card>
+
+          {/* Notes */}
+          {contact.notes && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm whitespace-pre-wrap">{contact.notes}</p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Files / Assets */}
           <ActivityFiles contactId={contact.id} />
         </div>
 
-        {/* Activity Timeline */}
-        <ActivityTimelineWrapper contactId={contact.id} />
+        {/* Center & Right Content - Activity Timeline */}
+        <div className="md:col-span-3">
+          <ActivityTimelineWrapper contactId={contact.id} />
+        </div>
       </div>
     </div>
   )

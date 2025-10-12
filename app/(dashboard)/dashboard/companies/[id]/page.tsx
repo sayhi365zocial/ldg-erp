@@ -168,165 +168,200 @@ export default async function CompanyDetailPage({
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Contact Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {company.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <a href={`mailto:${company.email}`} className="hover:underline">
-                  {company.email}
-                </a>
-              </div>
-            )}
-            {company.phone && (
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <a href={`tel:${company.phone}`} className="hover:underline">
-                  {company.phone}
-                </a>
-              </div>
-            )}
-            {company.website && (
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {company.website}
-                </a>
-              </div>
-            )}
-            {(company.address || company.city || company.province) && (
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <div className="text-sm">
-                  {company.address && <div>{company.address}</div>}
-                  <div>
-                    {[company.city, company.province, company.postalCode]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </div>
-                  {company.country && <div>{company.country}</div>}
+      <div className="grid gap-6 md:grid-cols-4">
+        {/* Left Sidebar */}
+        <div className="md:col-span-1 space-y-6">
+          {/* Key Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Key information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Industry */}
+              {company.industry && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Industry</div>
+                  <div className="text-sm">{company.industry}</div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
 
-        {/* Contact Persons */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Contact Persons ({company.contacts.length})</span>
-              <Link href={`/dashboard/contacts/new?companyId=${company.id}`}>
-                <Button size="sm" variant="outline">
-                  Add Contact
-                </Button>
-              </Link>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {company.contacts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No contacts yet</p>
-              ) : (
-                company.contacts.map((contact) => (
-                  <div
-                    key={contact.id}
-                    className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0"
+              {/* Email */}
+              {company.email && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Email</div>
+                  <a href={`mailto:${company.email}`} className="text-sm hover:underline flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    {company.email}
+                  </a>
+                </div>
+              )}
+
+              {/* Phone */}
+              {company.phone && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Phone number</div>
+                  <a href={`tel:${company.phone}`} className="text-sm hover:underline flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    {company.phone}
+                  </a>
+                </div>
+              )}
+
+              {/* Website */}
+              {company.website && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Website</div>
+                  <a
+                    href={company.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm hover:underline flex items-center gap-2"
                   >
-                    {contact.image ? (
-                      <div className="relative h-10 w-10 rounded-full overflow-hidden">
-                        <Image
-                          src={contact.image}
-                          alt={`${contact.firstName} ${contact.lastName}`}
-                          fill
-                          className="object-cover"
-                        />
+                    <Globe className="h-4 w-4" />
+                    {company.website}
+                  </a>
+                </div>
+              )}
+
+              {/* Address */}
+              {(company.address || company.city || company.province) && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Address</div>
+                  <div className="text-sm flex items-start gap-2">
+                    <MapPin className="h-4 w-4 mt-0.5" />
+                    <div>
+                      {company.address && <div>{company.address}</div>}
+                      <div>
+                        {[company.city, company.province, company.postalCode]
+                          .filter(Boolean)
+                          .join(", ")}
                       </div>
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <span className="text-sm font-semibold text-primary">
-                          {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/dashboard/contacts/${contact.id}/edit`}
-                          className="font-medium hover:underline"
-                        >
-                          {contact.firstName} {contact.lastName}
-                        </Link>
-                        {contact.isPrimary && (
-                          <Badge variant="outline" className="text-xs">
-                            Primary
-                          </Badge>
-                        )}
-                      </div>
-                      {contact.position && (
-                        <p className="text-sm text-muted-foreground">
-                          {contact.position}
-                        </p>
-                      )}
-                      <div className="text-sm space-y-1 mt-1">
-                        {contact.email && (
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            <a href={`mailto:${contact.email}`} className="hover:underline">
-                              {contact.email}
-                            </a>
-                          </div>
-                        )}
-                        {contact.phone && (
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Phone className="h-3 w-3" />
-                            <a href={`tel:${contact.phone}`} className="hover:underline">
-                              {contact.phone}
-                            </a>
-                          </div>
-                        )}
-                      </div>
+                      {company.country && <div>{company.country}</div>}
                     </div>
                   </div>
-                ))
+                </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Files / Assets */}
-        <ActivityFiles companyId={company.id} />
+              {/* Tax ID */}
+              {company.taxId && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Tax ID</div>
+                  <div className="text-sm">{company.taxId}</div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          {company.notes && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm whitespace-pre-wrap">{company.notes}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Files / Assets */}
+          <ActivityFiles companyId={company.id} />
+        </div>
+
+        {/* Center & Right Content */}
+        <div className="md:col-span-3 space-y-6">
+          {/* Contact Persons */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Contacts ({company.contacts.length})</span>
+                <Link href={`/dashboard/contacts/new?companyId=${company.id}`}>
+                  <Button size="sm" variant="outline">
+                    Add Contact
+                  </Button>
+                </Link>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {company.contacts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No contacts yet</p>
+                ) : (
+                  company.contacts.map((contact) => (
+                    <div
+                      key={contact.id}
+                      className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0"
+                    >
+                      {contact.image ? (
+                        <div className="relative h-10 w-10 rounded-full overflow-hidden">
+                          <Image
+                            src={contact.image}
+                            alt={`${contact.firstName} ${contact.lastName}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-sm font-semibold text-primary">
+                            {contact.firstName.charAt(0)}{contact.lastName.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/dashboard/contacts/${contact.id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {contact.firstName} {contact.lastName}
+                          </Link>
+                          {contact.isPrimary && (
+                            <Badge variant="outline" className="text-xs">
+                              Primary
+                            </Badge>
+                          )}
+                        </div>
+                        {contact.position && (
+                          <p className="text-sm text-muted-foreground">
+                            {contact.position}
+                          </p>
+                        )}
+                        <div className="text-sm space-y-1 mt-1">
+                          {contact.email && (
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Mail className="h-3 w-3" />
+                              <a href={`mailto:${contact.email}`} className="hover:underline">
+                                {contact.email}
+                              </a>
+                            </div>
+                          )}
+                          {contact.phone && (
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Phone className="h-3 w-3" />
+                              <a href={`tel:${contact.phone}`} className="hover:underline">
+                                {contact.phone}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Activity Timeline */}
+          <ActivityTimelineWrapper
+            companyId={company.id}
+            showContactName={true}
+            title="Activities"
+            description="All contact activities for this company"
+          />
+        </div>
       </div>
-
-      {/* Notes */}
-      {company.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-wrap">{company.notes}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Activity Timeline */}
-      <ActivityTimelineWrapper
-        companyId={company.id}
-        showContactName={true}
-        title="Recent Activities"
-        description="All contact activities for this company"
-      />
     </div>
   )
 }
