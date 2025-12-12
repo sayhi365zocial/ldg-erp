@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import path from "path"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { uploadToR2 } from "@/lib/r2"
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,25 +67,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Generate unique filename
-    const timestamp = Date.now()
-    const originalName = file.name.replace(/\s+/g, "-")
-    const filename = `${timestamp}-${originalName}`
-
-    // Save to public/uploads/{type}
-    const uploadDir = path.join(process.cwd(), "public", "uploads", type)
-    const filepath = path.join(uploadDir, filename)
-
-    // Create directory if it doesn't exist
-    await mkdir(uploadDir, { recursive: true })
-
-    await writeFile(filepath, buffer)
-
-    // Return the public URL
-    const publicUrl = `/uploads/${type}/${filename}`
+    // Upload to Cloudflare R2
+    const publicUrl = await uploadToR2({
+      file,
+      folder: type,
+    })
 
     return NextResponse.json({ url: publicUrl })
   } catch (error) {

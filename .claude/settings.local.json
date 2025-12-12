@@ -4,7 +4,20 @@
       "Bash(npm install)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(npx prisma generate:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(node -e:*)",
+      "Bash(npx shadcn@latest add alert-dialog:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(npx prisma studio)",
+      "Bash(ls:*)",
+      "Bash(npm run db:seed:*)"
     ],
     "deny": [],
     "ask": []
