@@ -70,7 +70,14 @@ export async function POST(req: Request) {
     return NextResponse.json(company)
   } catch (error) {
     console.error("Error creating company:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Failed to create company",
+        message: error instanceof Error ? error.message : "Unknown error",
+        details: process.env.NODE_ENV === 'development' ? error : undefined
+      },
+      { status: 500 }
+    )
   }
 }
 
