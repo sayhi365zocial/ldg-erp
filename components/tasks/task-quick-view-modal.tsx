@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Dialog,
   DialogContent,
@@ -8,8 +10,18 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Pencil, ExternalLink } from "lucide-react"
+import { Pencil, ExternalLink, Trash2 } from "lucide-react"
 import Link from "next/link"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface TaskQuickViewModalProps {
   task: any
@@ -31,6 +43,10 @@ const priorityColors = {
 }
 
 export function TaskQuickViewModal({ task, open, onOpenChange }: TaskQuickViewModalProps) {
+  const router = useRouter()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
   if (!task) return null
 
   function formatDate(date: string | null) {
@@ -42,6 +58,26 @@ export function TaskQuickViewModal({ task, open, onOpenChange }: TaskQuickViewMo
       hour: "2-digit",
       minute: "2-digit",
     })
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/tasks?id=${task.id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) throw new Error("Failed to delete task")
+
+      onOpenChange(false)
+      setShowDeleteDialog(false)
+      router.refresh()
+    } catch (error) {
+      console.error(error)
+      alert("Failed to delete task")
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "DONE"
@@ -179,21 +215,51 @@ export function TaskQuickViewModal({ task, open, onOpenChange }: TaskQuickViewMo
 
           {/* Actions */}
           <div className="flex gap-2 pt-4 border-t">
-            <Button asChild variant="outline" className="flex-1">
+            <Button asChild variant="outline">
               <Link href={`/dashboard/tasks/${task.id}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Full Details
               </Link>
             </Button>
-            <Button asChild className="flex-1">
+            <Button asChild>
               <Link href={`/dashboard/tasks/${task.id}/edit`}>
                 <Pencil className="mr-2 h-4 w-4" />
-                Edit Task
+                Edit
               </Link>
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isDeleting}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
             </Button>
           </div>
         </div>
       </DialogContent>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the task
+              &quot;{task.title}&quot; from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

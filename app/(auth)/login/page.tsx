@@ -63,6 +63,7 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 placeholder="name@company.com"
+                defaultValue="sayhi@365zocial.com"
                 required
                 disabled={isLoading}
               />
@@ -73,9 +74,13 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
+                defaultValue="admin123"
                 required
                 disabled={isLoading}
               />
+            </div>
+            <div className="text-xs text-muted-foreground text-center">
+              Default: sayhi@365zocial.com / admin123
             </div>
             {error && (
               <p className="text-sm text-destructive">{error}</p>
